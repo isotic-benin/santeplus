@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <rect width="800" height="1000" fill="#efe7da"/>
+  <rect x="40" y="40" width="720" height="920" fill="none" stroke="#dfd4c3" stroke-width="2"/>
+  <text x="400" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="72" fill="#96867a">Kora</text>
+  <text x="400" y="530" text-anchor="middle" font-family="Helvetica, sans-serif" font-size="14" letter-spacing="6" fill="#b4552d">MAISON</text>
+</svg>
