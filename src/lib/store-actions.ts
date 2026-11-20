@@ -26,6 +26,23 @@ import type {
 
 const cartSchema = z.array(cartItemSchema).min(1, "Votre panier est vide.");
 
+/**
+ * Regroupe les lectures nécessaires au checkout. Isolées dans une fonction pour
+ * pouvoir transformer une panne MongoDB en message lisible côté client au
+ * lieu de laisser remonter un `MongoServerSelectionError` brut.
+ */
+async function loadCheckoutData(ids: ObjectId[]) {
+  const db = await getDb();
+  const [docs, promotionDocs] = await Promise.all([
+    db
+      .collection<ProductDoc>("products")
+      .find({ _id: { $in: ids }, active: true })
+      .toArray(),
+    db.collection<PromotionDoc>("promotions").find({ active: true }).toArray(),
+  ]);
+  return { db, docs, promotionDocs };
+}
+
 export async function placeOrder(
   _prev: PlaceOrderState,
   formData: FormData,
@@ -67,15 +84,23 @@ export async function placeOrder(
     return { ok: false, error: "Votre panier est vide." };
   }
 
-  const db = await getDb();
+  const ids = [...grouped.keys()].map((id) => new ObjectId(id));
+
+  let checkoutData: Awaited<ReturnType<typeof loadCheckoutData>>;
+  try {
+    checkoutData = await loadCheckoutData(ids);
+  } catch (error) {
+    console.error("[checkout] MongoDB indisponible", error);
+    return {
+      ok: false,
+      error:
+        "Impossible de finaliser votre commande pour le moment. Merci de réessayer.",
+    };
+  }
+
+  const { db, docs, promotionDocs } = checkoutData;
   const products = db.collection<ProductDoc>("products");
   const orders = db.collection<OrderDoc>("orders");
-
-  const ids = [...grouped.keys()].map((id) => new ObjectId(id));
-  const [docs, promotionDocs] = await Promise.all([
-    products.find({ _id: { $in: ids }, active: true }).toArray(),
-    db.collection<PromotionDoc>("promotions").find({ active: true }).toArray(),
-  ]);
 
   const promotions = promotionDocs.map(mapPromotion);
   const productMap = new Map(docs.map((doc) => [doc._id.toString(), doc]));
@@ -129,6 +154,24 @@ export async function placeOrder(
   const decremented: Array<{ id: ObjectId; quantity: number }> = [];
   let stockError: string | null = null;
 
+  // La compensation ne doit jamais masquer l'erreur d'origine ni être jouée
+  // deux fois (sinon le stock est recrédité à tort).
+  const restoreStock = async () => {
+    try {
+      await Promise.all(
+        decremented.map((entry) =>
+          products.updateOne(
+            { _id: entry.id },
+            { $inc: { stock: entry.quantity } },
+          ),
+        ),
+      );
+    } catch (restoreError) {
+      console.error("[checkout] Échec de la restauration du stock", restoreError);
+    }
+    decremented.length = 0;
+  };
+
   try {
     for (const item of items) {
       const result = await products.updateOne(
@@ -150,14 +193,7 @@ export async function placeOrder(
     }
 
     if (stockError) {
-      await Promise.all(
-        decremented.map((entry) =>
-          products.updateOne(
-            { _id: entry.id },
-            { $inc: { stock: entry.quantity } },
-          ),
-        ),
-      );
+      await restoreStock();
       return { ok: false, error: stockError };
     }
 
@@ -175,14 +211,7 @@ export async function placeOrder(
       updatedAt: now,
     });
   } catch (error) {
-    await Promise.all(
-      decremented.map((entry) =>
-        products.updateOne(
-          { _id: entry.id },
-          { $inc: { stock: entry.quantity } },
-        ),
-      ),
-    );
+    await restoreStock();
     console.error("Erreur lors de la création de la commande", error);
     return {
       ok: false,
@@ -216,17 +245,26 @@ export async function submitContact(
     return { ok: true, message: "Merci, votre message a bien été envoyé." };
   }
 
-  const db = await getDb();
-  await db.collection<ContactMessageDoc>("messages").insertOne({
-    _id: new ObjectId(),
-    name: parsed.data.name,
-    email: parsed.data.email,
-    phone: parsed.data.phone ?? "",
-    subject: parsed.data.subject,
-    message: parsed.data.message,
-    read: false,
-    createdAt: new Date(),
-  });
+  try {
+    const db = await getDb();
+    await db.collection<ContactMessageDoc>("messages").insertOne({
+      _id: new ObjectId(),
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone ?? "",
+      subject: parsed.data.subject,
+      message: parsed.data.message,
+      read: false,
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    console.error("[contact] MongoDB indisponible", error);
+    return {
+      ok: false,
+      error:
+        "Impossible d'envoyer votre message pour le moment. Merci de réessayer.",
+    };
+  }
 
   return {
     ok: true,

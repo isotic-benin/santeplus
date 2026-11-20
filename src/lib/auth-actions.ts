@@ -19,6 +19,62 @@ function tooManyAttempts(email: string) {
   return entry.count > 8;
 }
 
+type LoginLookup =
+  | { ok: true; admin: AdminUser }
+  | { ok: false; state: ActionState };
+
+async function lookupAdmin(email: string, password: string): Promise<LoginLookup> {
+  try {
+    const db = await getDb();
+    const user = await db
+      .collection<AdminUserDoc>("users")
+      .findOne({ email });
+
+    const valid =
+      user && (await verifyPassword(password, user.passwordHash));
+
+    if (!valid || !user) {
+      // Le quota anti-brute-force ne doit être consommé que par un vrai
+      // échec d'authentification : une panne MongoDB ne doit pas verrouiller
+      // le compte administrateur pendant 10 minutes.
+      if (tooManyAttempts(email)) {
+        return {
+          ok: false,
+          state: {
+            ok: false,
+            error: "Trop de tentatives. Réessayez dans quelques minutes.",
+          },
+        };
+      }
+      return {
+        ok: false,
+        state: { ok: false, error: "E-mail ou mot de passe incorrect." },
+      };
+    }
+
+    attempts.delete(email);
+    return {
+      ok: true,
+      admin: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: "admin",
+      },
+    };
+  } catch (error) {
+    console.error("[auth] MongoDB indisponible lors de la connexion", error);
+    return {
+      ok: false,
+      state: {
+        ok: false,
+        error:
+          "Service momentanément indisponible. Réessayez dans quelques instants.",
+      },
+    };
+  }
+}
+
 export async function loginAction(
   _prev: ActionState,
   formData: FormData,
@@ -33,33 +89,10 @@ export async function loginAction(
   }
 
   const email = parsed.data.email.toLowerCase().trim();
-  if (tooManyAttempts(email)) {
-    return {
-      ok: false,
-      error: "Trop de tentatives. Réessayez dans quelques minutes.",
-    };
-  }
+  const lookup = await lookupAdmin(email, parsed.data.password);
+  if (!lookup.ok) return lookup.state;
 
-  const db = await getDb();
-  const user = await db
-    .collection<AdminUserDoc>("users")
-    .findOne({ email });
-
-  const valid =
-    user && (await verifyPassword(parsed.data.password, user.passwordHash));
-
-  if (!valid || !user) {
-    return { ok: false, error: "E-mail ou mot de passe incorrect." };
-  }
-
-  const admin: AdminUser = {
-    id: user._id.toString(),
-    name: user.name,
-    email: user.email,
-    role: "admin",
-  };
-
-  await createAdminSession(admin);
+  await createAdminSession(lookup.admin);
   redirect("/admin");
 }
 

@@ -121,6 +121,40 @@ for (const [key, fallback] of recommended) {
   }
 }
 
+// --- Connexion MongoDB (diagnostic non bloquant) ---------------------------
+// Un prérendu avec `cacheComponents` échouera de toute façon si la base est
+// injoignable. Ce test court (5 s) affiche la cause probable avant la pile
+// `MongoServerSelectionError`, sans bloquer un build qui pourrait réutiliser
+// le cache Next.js.
+async function checkMongoConnectivity(uri) {
+  if (errors.length || !uri || /<[^>]+>/.test(uri)) return;
+
+  try {
+    const { MongoClient } = await import("mongodb");
+    const client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 5_000,
+      maxPoolSize: 1,
+    });
+    try {
+      await client.connect();
+      await client.db(read("MONGODB_DB") || "shopify").command({ ping: 1 });
+      console.log("\n✔ Connexion MongoDB : ping OK");
+    } finally {
+      await client.close();
+    }
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    warnings.push(
+      `Connexion MongoDB impossible au build (${detail}). ` +
+        "Vérifier : cluster Atlas actif (pas en pause), Network Access " +
+        "0.0.0.0/0 pour Vercel, identifiants/authSource, certificats TLS " +
+        "et limite de connexions du cluster.",
+    );
+  }
+}
+
+await checkMongoConnectivity(mongoUri);
+
 // --- Rapport --------------------------------------------------------------
 if (warnings.length) {
   console.log("\n⚠  Variables d'environnement — avertissements");

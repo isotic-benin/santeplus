@@ -237,6 +237,39 @@ le XOF). Le formatage utilise `Intl.NumberFormat` avec la locale `fr-FR`.
 > `MONGODB_URI` n'est pas définie sur l'hébergeur : le code se rabat sur
 > localhost, où aucune base n'écoute.
 
+### Incident `MongoServerSelectionError: ReplicaSetNoPrimary`
+
+Si la production affiche `Server selection timed out after 15 000 ms` avec
+`type: 'ReplicaSetNoPrimary'`, lisez la `TopologyDescription` :
+
+- `setName: 'atlas-…'` renseigné → la résolution DNS SRV fonctionne ;
+- `commonWireVersion: 0` et `logicalSessionTimeoutMinutes: null` → **aucun**
+  nœud n'a réussi de handshake. Ce n'est pas seulement une élection en cours,
+  c'est « aucun serveur joignable ».
+
+Checklist à appliquer dans l'ordre (causes réelles, côté infrastructure) :
+
+1. Atlas → **Clusters** : le cluster doit être **Active** (pas en pause ; le
+   tier gratuit se met en pause après inactivité) et le primaire au vert.
+2. Atlas → **Network Access** : autoriser `0.0.0.0/0` pour Vercel (les IP de
+   sortie sont dynamiques), ou configurer un peering / PrivateLink.
+3. Atlas → **Database Access** : vérifier l'utilisateur, le mot de passe et
+   l'`authSource` de l'URI. Une URI `mongodb+srv://…` doit contenir le mot de
+   passe encodé (`@` → `%40`, `#` → `%23`, etc.).
+4. Atlas → **Metrics → Connections** : comparer au limite du tier. Un pic de
+   connexions = tempête de `MongoClient` (corrigée côté code, voir ci-dessous).
+5. TLS : certificats racine du runtime à jour (les profils TLS des fonctions
+   peuvent changer côté hébergeur).
+6. Tester depuis la fonction : `GET /api/health` renvoie `200` + la latence si
+   `ping` répond, `503` + le message d'erreur sinon.
+
+Côté application, la résilience est maintenant assurée par
+`src/lib/mongodb.ts` : client unique partagé par isolate (plus de pool créé
+par requête), fermeture des clients en échec, 2 tentatives avec jitter sur les
+erreurs de topologie uniquement, sélection portée à 15 s, retries driver
+activés, et reset du cache en cas d'échec. Les pages ont une frontière
+d'erreur lisible (`src/app/error.tsx`) au lieu de la stack brute.
+
 1. Créez une base MongoDB Atlas et récupérez son URI.
 2. Dans MongoDB Atlas → **Network Access**, autorisez les IP de l'hébergeur.
    Sur Vercel, les IP de build sont dynamiques : ajoutez `0.0.0.0/0` (ou passez
