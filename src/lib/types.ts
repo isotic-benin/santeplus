@@ -227,6 +227,18 @@ export interface CartItem {
   stock: number;
 }
 
+/** Produit commandé directement depuis sa fiche, sans passer par le panier. */
+export interface DirectCheckoutItem {
+  productId: string;
+  slug: string;
+  name: string;
+  image: string;
+  /** Prix effective facturé (promotions incluses). */
+  price: number;
+  stock: number;
+  quantity: number;
+}
+
 export interface ActionState {
   ok: boolean;
   error?: string;

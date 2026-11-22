@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/lib/config";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-archivo",
   display: "swap",
 });
 
-const manrope = Manrope({
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  weight: ["500", "600", "700"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
@@ -48,7 +49,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="fr"
-      className={`${fraunces.variable} ${manrope.variable} h-full`}
+      data-scroll-behavior="smooth"
+      className={`${archivo.variable} ${plexMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col bg-base text-ink">
         {children}

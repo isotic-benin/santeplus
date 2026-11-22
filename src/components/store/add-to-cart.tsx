@@ -1,7 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Check, Plus, ShoppingBag } from "lucide-react";
+import { ArrowRight, Check, Plus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/store/cart-provider";
 import { QuantityStepper } from "@/components/store/quantity-stepper";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ export function AddToCart({
   variant?: "icon" | "full";
   className?: string;
 }) {
+  const router = useRouter();
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -44,6 +46,14 @@ export function AddToCart({
     timer.current = setTimeout(() => setAdded(false), 2000);
   };
 
+  // Achat direct : la quantité choisie est transmise à la page de commande,
+  // qui résout le produit côté serveur (le panier n'est pas utilisé).
+  const orderNow = () => {
+    router.push(
+      `/commande?produit=${encodeURIComponent(product.slug)}&quantite=${quantity}`,
+    );
+  };
+
   if (product.stock <= 0) {
     return (
       <span
@@ -63,8 +73,8 @@ export function AddToCart({
         type="button"
         onClick={() => add(1)}
         className={cn(
-          "grid h-11 w-11 place-items-center bg-ink text-base shadow-none transition-colors duration-200 hover:bg-accent focus-visible:outline-offset-2",
-          added && "bg-accent",
+          "grid h-11 w-11 place-items-center border-2 border-ink bg-accent text-white transition-colors duration-100 hover:bg-ink focus-visible:outline-offset-2",
+          added && "bg-ink",
           className,
         )}
         aria-label={
@@ -93,20 +103,27 @@ export function AddToCart({
         />
         <button
           type="button"
-          onClick={() => add(quantity)}
-          className="btn btn-primary flex-1"
+          onClick={orderNow}
+          className="btn btn-accent flex-1"
         >
-          {added ? (
-            <>
-              <Check className="h-4 w-4" /> Ajouté au panier
-            </>
-          ) : (
-            <>
-              <ShoppingBag className="h-4 w-4" /> Ajouter au panier
-            </>
-          )}
+          Commander maintenant <ArrowRight className="h-4 w-4" />
         </button>
       </div>
+      <button
+        type="button"
+        onClick={() => add(quantity)}
+        className="btn btn-outline w-full"
+      >
+        {added ? (
+          <>
+            <Check className="h-4 w-4" /> Ajouté au panier
+          </>
+        ) : (
+          <>
+            <ShoppingBag className="h-4 w-4" /> Ajouter au panier
+          </>
+        )}
+      </button>
       <p className="text-xs text-ink-3" aria-live="polite">
         {added
           ? `${quantity} article${quantity > 1 ? "s" : ""} ajouté${quantity > 1 ? "s" : ""} au panier.`

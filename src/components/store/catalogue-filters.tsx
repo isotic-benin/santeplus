@@ -40,7 +40,7 @@ export function CatalogueFilters({
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <form
           className="relative w-full max-w-md"
@@ -81,13 +81,13 @@ export function CatalogueFilters({
         </form>
 
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs text-ink-3" aria-live="polite">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-ink-2" aria-live="polite">
             {total} produit{total > 1 ? "s" : ""}
           </p>
           <div className="flex items-center gap-2">
             <label
               htmlFor="catalogue-sort"
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3"
+              className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink"
             >
               Trier
             </label>
@@ -107,15 +107,16 @@ export function CatalogueFilters({
       </div>
 
       <div className="flex flex-wrap gap-2" aria-label="Filtrer par catégorie">
+        <span className="sr-only">Filtrer par catégorie</span>
         <button
           type="button"
           onClick={() => navigate({ category: "tout" })}
           aria-pressed={category === "tout"}
           className={cn(
-            "border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors",
+            "border-2 px-3.5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
             category === "tout"
-              ? "border-ink bg-ink text-base"
-              : "border-line-strong bg-transparent text-ink-2 hover:border-ink hover:text-ink",
+              ? "border-ink bg-ink text-white"
+              : "border-ink bg-white text-ink hover:bg-accent hover:text-white",
           )}
         >
           Tout
@@ -127,10 +128,10 @@ export function CatalogueFilters({
             onClick={() => navigate({ category: entry.slug })}
             aria-pressed={category === entry.slug}
             className={cn(
-              "border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors",
+              "border-2 px-3.5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
               category === entry.slug
-                ? "border-ink bg-ink text-base"
-                : "border-line-strong bg-transparent text-ink-2 hover:border-ink hover:text-ink",
+                ? "border-ink bg-ink text-white"
+                : "border-ink bg-white text-ink hover:bg-accent hover:text-white",
             )}
           >
             {entry.name}

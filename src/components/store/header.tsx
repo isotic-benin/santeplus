@@ -35,24 +35,25 @@ function useIsActive() {
 /**
  * Liens de navigation principaux. `usePathname()` est une donnée d'URL : elle
  * n'est disponible qu'à l'exécution, donc ce composant est rendu dans un
- * boundary Suspense (voir `DesktopNav`). Le fallback statique affiche les mêmes
- * liens sans l'état actif pour que la coquille prerendue reste complète.
+ * boundary Suspense (voir `DesktopNavFallback`). Le fallback statique affiche
+ * les mêmes liens sans l'état actif pour que la coquille prerendue reste complète.
  */
 function DesktopNav() {
   const isActive = useIsActive();
 
   return (
     <nav
-      className="hidden items-center gap-9 md:flex"
+      className="hidden items-center gap-8 md:flex"
       aria-label="Navigation principale"
     >
-      {links.map((link) => (
+      {links.map((link, index) => (
         <Link
           key={link.href}
           href={link.href}
           className="nav-link"
           data-active={isActive(link.href)}
         >
+          <span className="mr-2 text-accent">0{index + 1}</span>
           {link.label}
         </Link>
       ))}
@@ -63,11 +64,12 @@ function DesktopNav() {
 function DesktopNavFallback() {
   return (
     <nav
-      className="hidden items-center gap-9 md:flex"
+      className="hidden items-center gap-8 md:flex"
       aria-label="Navigation principale"
     >
-      {links.map((link) => (
+      {links.map((link, index) => (
         <Link key={link.href} href={link.href} className="nav-link">
+          <span className="mr-2 text-accent">0{index + 1}</span>
           {link.label}
         </Link>
       ))}
@@ -78,11 +80,13 @@ function DesktopNavFallback() {
 function MobileMenu({
   onClose,
   closeRef,
+  dialogRef,
   ready,
   count,
 }: {
   onClose: () => void;
   closeRef: RefObject<HTMLButtonElement | null>;
+  dialogRef: RefObject<HTMLDivElement | null>;
   ready: boolean;
   count: number;
 }) {
@@ -90,25 +94,28 @@ function MobileMenu({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-base md:hidden"
+      ref={dialogRef}
+      className="fixed inset-0 z-50 flex flex-col bg-white md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Menu principal"
     >
-      <div className="flex h-[4.5rem] items-center justify-between border-b border-line px-5">
-        <span className="font-display text-2xl">Major et fils</span>
+      <div className="flex h-[4.5rem] items-center justify-between border-b-2 border-ink px-5">
+        <span className="text-2xl font-extrabold uppercase tracking-[-0.06em]">
+          Et fils
+        </span>
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="grid h-10 w-10 place-items-center"
+          className="grid h-11 w-11 place-items-center border-2 border-ink"
           aria-label="Fermer le menu"
         >
-          <X className="h-5 w-5" strokeWidth={1.6} />
+          <X className="h-5 w-5" strokeWidth={2} />
         </button>
       </div>
       <nav
-        className="flex flex-1 flex-col justify-center gap-2 px-6"
+        className="flex flex-1 flex-col justify-center px-6"
         aria-label="Navigation mobile"
       >
         {links.map((link, index) => (
@@ -117,11 +124,11 @@ function MobileMenu({
             href={link.href}
             onClick={onClose}
             className={cn(
-              "flex items-baseline gap-4 border-b border-line py-5 font-display text-4xl transition-colors hover:text-accent",
+              "flex items-baseline gap-4 border-b-2 border-ink py-5 text-4xl font-extrabold uppercase tracking-[-0.05em]",
               isActive(link.href) ? "text-accent" : "text-ink",
             )}
           >
-            <span className="text-[11px] font-sans font-semibold tracking-[0.2em] text-ink-3">
+            <span className="font-mono text-xs font-bold tracking-[0.12em] text-ink-3">
               0{index + 1}
             </span>
             {link.label}
@@ -130,21 +137,17 @@ function MobileMenu({
         <Link
           href="/panier"
           onClick={onClose}
-          className="mt-8 flex items-center justify-between bg-ink px-5 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-base"
+          className="mt-8 flex items-center justify-between bg-ink px-5 py-4 font-mono text-xs font-bold uppercase tracking-[0.14em] text-white"
         >
           Mon panier
-          <span className="rounded-full bg-base px-2 py-0.5 text-[11px] text-ink">
+          <span className="bg-accent px-2 py-0.5 text-white">
             {ready ? count : 0}
           </span>
         </Link>
       </nav>
-      <div className="border-t border-line px-6 py-6 text-xs text-ink-2">
+      <div className="border-t-2 border-ink px-6 py-5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
         <p>Paiement à la livraison · Retours sous 7 jours</p>
-        <Link
-          href="/admin"
-          onClick={onClose}
-          className="mt-2 inline-block underline"
-        >
+        <Link href="/admin" onClick={onClose} className="mt-2 inline-block underline">
           Espace administration
         </Link>
       </div>
@@ -156,24 +159,44 @@ export function Header() {
   const { count, ready } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus();
     };
   }, [menuOpen]);
 
   return (
     <>
-      <div className="bg-ink text-base">
+      <div className="bg-ink text-white">
         <div className="ticker py-2" aria-hidden="true">
           <div className="ticker-track">
             {[0, 1].map((copy) => (
@@ -181,10 +204,10 @@ export function Header() {
                 {tickerItems.map((item) => (
                   <span
                     key={`${copy}-${item}`}
-                    className="flex items-center text-[11px] font-semibold uppercase tracking-[0.18em]"
+                    className="flex items-center font-mono text-[11px] font-bold uppercase tracking-[0.14em]"
                   >
                     {item}
-                    <span className="mx-6 inline-block h-1 w-1 rotate-45 bg-accent" />
+                    <span className="mx-6 inline-block h-1.5 w-1.5 bg-accent" />
                   </span>
                 ))}
               </div>
@@ -196,18 +219,23 @@ export function Header() {
         </p>
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-base">
-        <div className="shell flex h-[4.5rem] items-center justify-between gap-6">
+      <header className="sticky top-0 z-40 border-b-2 border-ink bg-white">
+        <div className="shell flex h-[4.5rem] items-center justify-between gap-5">
           <Link
             href="/"
-            className="group inline-flex flex-col leading-none"
+            className="group flex items-center gap-3"
             aria-label="Major et fils — accueil"
           >
-            <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-3 transition-colors group-hover:text-accent">
-              Major
+            <span className="grid h-9 w-9 place-items-center bg-accent font-mono text-xs font-bold text-white">
+              MF
             </span>
-            <span className="mt-1 font-display text-[1.9rem] font-medium tracking-[-0.04em]">
-              et fils
+            <span className="flex flex-col leading-none">
+              <span className="font-mono text-[10px] font-bold tracking-[0.22em] text-ink-3 group-hover:text-accent">
+                MAJOR
+              </span>
+              <span className="mt-1 text-2xl font-extrabold uppercase tracking-[-0.06em]">
+                et fils
+              </span>
             </span>
           </Link>
 
@@ -215,22 +243,22 @@ export function Header() {
             <DesktopNav />
           </Suspense>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/catalogue"
               aria-label="Rechercher un produit"
-              className="grid h-10 w-10 place-items-center text-ink-2 transition-colors hover:text-accent"
+              className="grid h-11 w-11 place-items-center border-2 border-ink text-ink transition-colors hover:bg-ink hover:text-white"
             >
-              <Search className="h-[1.15rem] w-[1.15rem]" strokeWidth={1.6} />
+              <Search className="h-[1.15rem] w-[1.15rem]" strokeWidth={2} />
             </Link>
             <Link
               href="/panier"
-              className="relative grid h-10 w-10 place-items-center text-ink transition-colors hover:text-accent"
+              className="relative grid h-11 w-11 place-items-center border-2 border-ink text-ink transition-colors hover:bg-ink hover:text-white"
               aria-label={`Panier${ready && count > 0 ? `, ${count} article${count > 1 ? "s" : ""}` : " vide"}`}
             >
-              <ShoppingBag className="h-[1.2rem] w-[1.2rem]" strokeWidth={1.6} />
+              <ShoppingBag className="h-[1.2rem] w-[1.2rem]" strokeWidth={2} />
               {ready && count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-[1.15rem] min-w-[1.15rem] place-items-center rounded-full bg-accent px-1 text-[11px] font-bold leading-none text-white">
+                <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center bg-accent px-1 font-mono text-[11px] font-bold leading-none text-white">
                   {count}
                 </span>
               )}
@@ -238,11 +266,11 @@ export function Header() {
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="grid h-10 w-10 place-items-center text-ink md:hidden"
+              className="grid h-11 w-11 place-items-center border-2 border-ink text-ink md:hidden"
               aria-label="Ouvrir le menu"
               aria-expanded={menuOpen}
             >
-              <Menu className="h-5 w-5" strokeWidth={1.6} />
+              <Menu className="h-5 w-5" strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -252,6 +280,7 @@ export function Header() {
         <MobileMenu
           onClose={() => setMenuOpen(false)}
           closeRef={closeRef}
+          dialogRef={dialogRef}
           ready={ready}
           count={count}
         />

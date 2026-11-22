@@ -22,7 +22,7 @@ export function QuantityStepper({
   return (
     <div
       className={cn(
-        "inline-flex items-center border border-line-strong bg-surface",
+        "inline-flex items-center border-2 border-ink bg-white",
         small ? "h-9" : "h-12",
       )}
       role="group"
@@ -33,7 +33,7 @@ export function QuantityStepper({
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
         className={cn(
-          "grid place-items-center text-ink-2 transition-colors hover:text-accent disabled:opacity-30",
+          "grid place-items-center font-mono text-ink transition-colors hover:bg-accent hover:text-white disabled:opacity-30",
           small ? "h-9 w-9" : "h-12 w-11",
         )}
         aria-label="Diminuer la quantité"
@@ -54,7 +54,7 @@ export function QuantityStepper({
         onClick={() => onChange(Math.min(limit, value + 1))}
         disabled={value >= limit}
         className={cn(
-          "grid place-items-center text-ink-2 transition-colors hover:text-accent disabled:opacity-30",
+          "grid place-items-center font-mono text-ink transition-colors hover:bg-accent hover:text-white disabled:opacity-30",
           small ? "h-9 w-9" : "h-12 w-11",
         )}
         aria-label="Augmenter la quantité"

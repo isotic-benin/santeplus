@@ -16,9 +16,9 @@ export function ContactForm() {
 
   if (state.ok) {
     return (
-      <div className="border border-line bg-surface p-8 sm:p-10">
-        <CheckCircle2 className="h-9 w-9 text-accent" strokeWidth={1.4} />
-        <h2 className="mt-5 font-display text-3xl">Message bien reçu</h2>
+      <div className="border-2 border-ink border-l-4 border-l-accent bg-surface p-8 sm:p-10">
+        <CheckCircle2 className="h-9 w-9 text-accent" strokeWidth={2} />
+        <h2 className="mt-5 text-3xl font-extrabold uppercase tracking-[-0.04em]">Message bien reçu</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-2">
           {state.message ??
             "Merci pour votre message. Notre équipe vous répond sous 24 h ouvrées."}
@@ -32,7 +32,7 @@ export function ContactForm() {
       {state.error && (
         <div
           role="alert"
-          className="border border-[#9b2c2c]/30 bg-[#f9e9e7] px-4 py-3 text-sm text-[#8a3229]"
+          className="border-2 border-[#8a1f1f] bg-[#f5dfdd] px-4 py-3 text-sm font-semibold text-[#8a1f1f]"
         >
           {state.error}
         </div>
@@ -134,7 +134,7 @@ export function ContactForm() {
         />
       </div>
 
-      <button type="submit" disabled={pending} className="btn btn-primary">
+      <button type="submit" disabled={pending} className="btn btn-accent">
         {pending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" /> Envoi…

@@ -43,7 +43,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <div
-      className="relative aspect-[4/5] overflow-hidden bg-surface-2"
+      className="relative aspect-[4/5] border-2 border-ink bg-surface-2"
       role="region"
       aria-roledescription="carousel"
       aria-label="Promotions en cours"
@@ -64,7 +64,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           tabIndex={slideIndex === index ? 0 : -1}
           aria-label={slide.title}
           className={cn(
-            "absolute inset-0 block transition-opacity duration-700 ease-out",
+            "absolute inset-0 block transition-opacity duration-300 linear",
             slideIndex === index
               ? "opacity-100"
               : "pointer-events-none opacity-0",
@@ -78,16 +78,16 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             sizes="(max-width: 1024px) 90vw, 38vw"
             className="object-cover"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent p-6 pb-8 sm:p-8">
+          <div className="absolute inset-x-0 bottom-0 border-t-2 border-ink bg-ink p-5 text-white sm:p-6">
             {slide.description && (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-accent-soft">
                 {slide.description}
               </p>
             )}
-            <p className="mt-2 max-w-[22ch] font-display text-2xl leading-tight text-white sm:text-3xl">
+            <p className="mt-2 max-w-[22ch] text-2xl font-extrabold uppercase leading-[0.95] tracking-[-0.04em] sm:text-3xl">
               {slide.title}
             </p>
-            <span className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
+            <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
               En profiter
               <ChevronRight className="h-3.5 w-3.5" />
             </span>
@@ -101,20 +101,20 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             type="button"
             onClick={() => goTo(index - 1)}
             aria-label="Promotion précédente"
-            className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/40 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="absolute left-3 top-4 z-10 grid h-10 w-10 place-items-center border-2 border-white bg-ink text-white transition-colors hover:bg-accent focus-visible:outline-white"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </button>
           <button
             type="button"
             onClick={() => goTo(index + 1)}
             aria-label="Promotion suivante"
-            className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/40 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="absolute right-3 top-4 z-10 grid h-10 w-10 place-items-center border-2 border-white bg-ink text-white transition-colors hover:bg-accent focus-visible:outline-white"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" strokeWidth={2} />
           </button>
 
-          <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center gap-2">
+          <div className="absolute bottom-3 left-3 z-10 flex gap-1">
             {slides.map((slide, slideIndex) => (
               <button
                 key={slide.id}
@@ -123,12 +123,14 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 aria-label={`Afficher la promotion ${slideIndex + 1} sur ${count}`}
                 aria-current={slideIndex === index}
                 className={cn(
-                  "h-2.5 w-2.5 rounded-full border border-white/70 transition-all",
+                  "grid h-7 w-7 place-items-center border-2 border-white font-mono text-[11px] font-bold text-white transition-colors",
                   slideIndex === index
-                    ? "scale-125 bg-accent"
-                    : "bg-white/40 hover:bg-white/70",
+                    ? "bg-accent"
+                    : "bg-ink/70 hover:bg-ink",
                 )}
-              />
+              >
+                {String(slideIndex + 1).padStart(2, "0")}
+              </button>
             ))}
           </div>
         </>

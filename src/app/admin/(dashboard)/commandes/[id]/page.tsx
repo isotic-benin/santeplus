@@ -222,10 +222,9 @@ export default async function AdminOrderDetailPage({
                   className="mt-0.5 h-4 w-4 shrink-0 text-accent"
                   strokeWidth={1.5}
                 />
-                <span>
-                  {order.customer.address}
-                  <br />
-                  {order.customer.city}
+                <span className="grid gap-0.5">
+                  <span>{order.customer.address}</span>
+                  <span>{order.customer.city}</span>
                 </span>
               </p>
               <p className="flex items-center gap-2">

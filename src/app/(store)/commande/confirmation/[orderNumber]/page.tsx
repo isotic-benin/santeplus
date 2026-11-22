@@ -37,11 +37,11 @@ export default async function ConfirmationPage({
   return (
     <div className="shell py-9 lg:py-12">
       <div className="mx-auto max-w-3xl text-center">
-        <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-accent text-accent">
-          <Check className="h-7 w-7" strokeWidth={1.5} />
+        <span className="mx-auto grid h-16 w-16 place-items-center bg-accent text-white">
+          <Check className="h-8 w-8" strokeWidth={2.5} />
         </span>
         <p className="eyebrow mt-6">Commande enregistrée</p>
-        <h1 className="display mt-3 text-4xl sm:text-5xl">
+        <h1 className="display mt-3 text-4xl sm:text-6xl">
           Merci {order.customer.fullName.split(" ")[0]} !
         </h1>
         <p className="mt-4 text-base leading-relaxed text-ink-2">
@@ -54,18 +54,18 @@ export default async function ConfirmationPage({
         <span className={`badge mt-5 ${status.className}`}>{status.label}</span>
       </div>
 
-      <div className="mx-auto mt-9 max-w-4xl border border-line bg-surface">
-        <div className="grid gap-6 border-b border-line p-6 sm:grid-cols-2 sm:p-8">
+      <div className="panel mx-auto mt-9 max-w-4xl">
+        <div className="grid gap-6 border-b-2 border-ink p-6 sm:grid-cols-2 sm:p-8">
           <div>
             <p className="eyebrow">Commande</p>
-            <p className="mt-2 font-display text-2xl">{order.orderNumber}</p>
+            <p className="mt-2 font-mono text-2xl font-bold tracking-[-0.03em]">{order.orderNumber}</p>
             <p className="mt-1 text-xs text-ink-3">
               Passée le {formatDateTime(order.createdAt)}
             </p>
           </div>
           <div className="sm:text-right">
             <p className="eyebrow">Total à régler</p>
-            <p className="mt-2 font-display text-3xl tabular-nums">
+            <p className="mt-2 font-mono text-3xl font-bold tracking-[-0.04em] tabular-nums">
               {formatPrice(order.total)}
             </p>
             <p className="mt-1 text-xs text-ink-3">
@@ -75,17 +75,17 @@ export default async function ConfirmationPage({
         </div>
 
         {!cancelled ? (
-          <div className="border-b border-line p-6 sm:p-8">
+          <div className="border-b-2 border-ink p-6 sm:p-8">
             <ol className="grid grid-cols-4 gap-2">
               {timeline.map((step) => {
                 const reached = currentStep >= orderStatusMeta[step.status].step;
                 return (
                   <li key={step.status} className="relative">
                     <div
-                      className={`mb-3 h-1 w-full ${reached ? "bg-accent" : "bg-line"}`}
+                      className={`mb-3 h-2 w-full ${reached ? "bg-accent" : "bg-surface-2"}`}
                     />
                     <p
-                      className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                      className={`font-mono text-[11px] font-bold uppercase tracking-[0.12em] ${
                         reached ? "text-ink" : "text-ink-3"
                       }`}
                     >
@@ -105,11 +105,11 @@ export default async function ConfirmationPage({
 
         <div className="grid grid-cols-1 gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <div>
-            <h2 className="font-display text-2xl">Vos articles</h2>
-            <ul className="mt-4 divide-y divide-line">
+            <h2 className="text-2xl font-extrabold uppercase tracking-[-0.04em]">Vos articles</h2>
+            <ul className="mt-4 divide-y-2 divide-ink">
               {order.items.map((item) => (
                 <li key={item.productId} className="flex gap-4 py-4 first:pt-0">
-                  <div className="media h-20 w-16 shrink-0">
+                  <div className="media h-20 w-16 shrink-0 border-2 border-ink">
                     <Image
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
@@ -121,7 +121,7 @@ export default async function ConfirmationPage({
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/catalogue/${item.slug}`}
-                      className="block truncate font-display text-base hover:text-accent"
+                      className="block truncate text-base font-extrabold uppercase tracking-[-0.03em] hover:text-accent"
                     >
                       {item.name}
                     </Link>
@@ -129,14 +129,14 @@ export default async function ConfirmationPage({
                       {item.quantity} × {formatPrice(item.unitPrice)}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold tabular-nums">
+                  <p className="font-mono text-sm font-bold tabular-nums">
                     {formatPrice(item.lineTotal)}
                   </p>
                 </li>
               ))}
             </ul>
 
-            <dl className="mt-4 space-y-2 border-t border-line pt-4 text-sm">
+            <dl className="mt-4 space-y-2 border-t-2 border-ink pt-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-ink-2">Sous-total</dt>
                 <dd className="tabular-nums">{formatPrice(order.subtotal)}</dd>
@@ -149,7 +149,7 @@ export default async function ConfirmationPage({
                     : formatPrice(order.shippingFee)}
                 </dd>
               </div>
-              <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
+              <div className="flex justify-between border-t-2 border-ink pt-3 text-base font-semibold">
                 <dt>Total</dt>
                 <dd className="tabular-nums">{formatPrice(order.total)}</dd>
               </div>
@@ -158,16 +158,14 @@ export default async function ConfirmationPage({
 
           <div className="space-y-5">
             <div>
-              <h2 className="font-display text-2xl">Livraison</h2>
+              <h2 className="text-2xl font-extrabold uppercase tracking-[-0.04em]">Livraison</h2>
               <div className="mt-3 space-y-2 text-sm text-ink-2">
                 <p className="flex gap-2">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={1.5} />
-                  <span>
-                    {order.customer.fullName}
-                    <br />
-                    {order.customer.address}
-                    <br />
-                    {order.customer.city}
+                  <span className="grid gap-0.5">
+                    <span className="font-semibold text-ink">{order.customer.fullName}</span>
+                    <span>{order.customer.address}</span>
+                    <span>{order.customer.city}</span>
                   </span>
                 </p>
                 <p className="flex items-center gap-2">
@@ -181,14 +179,14 @@ export default async function ConfirmationPage({
                   </p>
                 )}
                 {order.customer.notes && (
-                  <p className="border-t border-line pt-3 text-xs italic text-ink-3">
+                  <p className="border-t-2 border-ink pt-3 text-xs italic text-ink-3">
                     « {order.customer.notes} »
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="border border-line bg-base p-4 text-xs leading-relaxed text-ink-2">
+            <div className="border-2 border-ink border-l-4 border-l-accent bg-surface p-4 text-xs leading-relaxed text-ink-2">
               <p className="font-semibold uppercase tracking-[0.12em] text-ink">
                 Paiement à la livraison
               </p>

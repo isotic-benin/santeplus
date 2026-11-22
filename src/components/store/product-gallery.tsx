@@ -19,7 +19,7 @@ export function ProductGallery({
   return (
     <div>
       <div className="relative">
-        <div className="media aspect-[4/5]">
+        <div className="media aspect-[4/5] border-2 border-ink">
           <Image
             src={current}
             alt={name}
@@ -44,7 +44,7 @@ export function ProductGallery({
               onClick={() => setActive(index)}
               className={cn(
                 "media aspect-square border-2 transition-colors",
-                active === index ? "border-accent" : "border-transparent",
+                active === index ? "border-accent" : "border-ink",
               )}
             >
               <Image
