@@ -74,13 +74,8 @@ export async function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/panier" className="hover:text-accent-soft">
-                    03 — Panier
-                  </Link>
-                </li>
-                <li>
                   <Link href="/contact" className="hover:text-accent-soft">
-                    04 — Contact
+                    03 — Contact
                   </Link>
                 </li>
                 <li>

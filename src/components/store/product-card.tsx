@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { AddToCart } from "@/components/store/add-to-cart";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
@@ -53,11 +52,6 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {product.stock > 0 && (
-          <div className="absolute bottom-2 right-2">
-            <AddToCart product={product} />
-          </div>
-        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">

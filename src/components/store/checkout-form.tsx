@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { ArrowRight, Loader2, LockKeyhole, Truck } from "lucide-react";
-import { useCart } from "@/components/store/cart-provider";
 import { placeOrder } from "@/lib/store-actions";
 import { siteConfig } from "@/lib/config";
 import { computeShipping } from "@/lib/pricing";
@@ -22,8 +21,6 @@ export function CheckoutForm({
   productUnavailable?: boolean;
 }) {
   const router = useRouter();
-  const { items, ready, subtotal: cartSubtotal, clearCart } = useCart();
-  const isDirect = Boolean(directItem);
   const [state, formAction, pending] = useActionState(
     placeOrder,
     initialState,
@@ -31,41 +28,26 @@ export function CheckoutForm({
 
   useEffect(() => {
     if (state.ok && state.orderNumber) {
-      // En achat direct le panier n'a pas été utilisé : on le laisse intact.
-      if (!isDirect) clearCart();
       router.replace(`/commande/confirmation/${state.orderNumber}`);
     }
-  }, [state, isDirect, clearCart, router]);
+  }, [state, router]);
 
-  // Le mode direct n'a besoin d'aucune donnée du panier (localStorage).
-  if (!ready && !isDirect) {
-    return (
-      <div className="shell py-12">
-        <div className="skeleton h-10 w-64" />
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-          <div className="skeleton h-[28rem]" />
-          <div className="skeleton h-80" />
-        </div>
-      </div>
-    );
-  }
-
-  const checkoutItems = directItem ? [directItem] : items;
-  const subtotal = directItem
-    ? directItem.price * directItem.quantity
-    : cartSubtotal;
+  // Le checkout est désormais exclusivement direct : la fiche produit résout
+  // le produit côté serveur et transmet la quantité dans l'URL.
+  const checkoutItems = directItem ? [directItem] : [];
+  const subtotal = directItem ? directItem.price * directItem.quantity : 0;
 
   if (checkoutItems.length === 0 && !state.orderNumber) {
     return (
       <div className="shell flex min-h-[50vh] flex-col items-center justify-center py-14 text-center">
         <p className="eyebrow">Commande</p>
         <h1 className="display mt-3 text-4xl sm:text-6xl">
-          {productUnavailable ? "Produit indisponible" : "Votre panier est vide"}
+          {productUnavailable ? "Produit indisponible" : "Aucun produit sélectionné"}
         </h1>
         <p className="mt-4 max-w-md text-sm text-ink-2">
           {productUnavailable
             ? "Ce produit n'est plus disponible à la vente. Découvrez nos autres produits pour passer commande."
-            : "Ajoutez d'abord quelques produits à votre panier pour passer commande."}
+            : "Choisissez un produit dans le catalogue pour passer commande."}
         </p>
         <Link href="/catalogue" className="btn btn-primary mt-8">
           Voir le catalogue <ArrowRight className="h-4 w-4" />
@@ -88,7 +70,7 @@ export function CheckoutForm({
   return (
     <div className="shell py-9 lg:py-12">
       <div className="border-b-2 border-ink pb-6">
-        <p className="eyebrow">{isDirect ? "Achat direct" : "Dernière étape"}</p>
+        <p className="eyebrow">Achat direct</p>
         <h1 className="display mt-2 text-5xl sm:text-6xl">Votre commande</h1>
         <p className="mt-3 max-w-2xl text-base font-medium text-ink-2">
           Renseignez votre adresse de livraison. Aucun paiement en ligne :

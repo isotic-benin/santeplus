@@ -134,6 +134,11 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    .mobile-order-bar,
+    .mobile-order-bar::before {
+      animation: none;
+      transform: none;
+    }
   }
 }
 
@@ -491,6 +496,46 @@
     transform: scale(1.02);
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Barre de commande mobile — présentée une seule fois, sans ombre ni rayon. */
+  .mobile-order-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 45;
+    border-top: 2px solid var(--ink);
+    background: var(--base);
+    padding: 0.75rem clamp(1rem, 3vw, 2.5rem);
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    animation: order-bar-in var(--dur-slow) var(--ease-out) both;
+  }
+
+  .mobile-order-bar::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: order-bar-rule 520ms var(--ease-out) 160ms both;
+  }
+
+  .mobile-order-cta {
+    min-height: 3rem;
+    padding-inline: 1rem;
+    white-space: nowrap;
+  }
+
   .arch {
     border-radius: 0;
   }
@@ -604,5 +649,25 @@
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+@keyframes order-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes order-bar-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }

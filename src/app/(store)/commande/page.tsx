@@ -51,7 +51,7 @@ export default async function CheckoutPage({
 
   return (
     <CheckoutForm
-      key={directItem ? `direct-${directItem.slug}` : "cart"}
+      key={directItem ? `direct-${directItem.slug}` : "empty"}
       directItem={directItem ?? undefined}
       productUnavailable={Boolean(slug) && !directItem}
     />

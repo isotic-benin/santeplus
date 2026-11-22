@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { ProductGallery } from "@/components/store/product-gallery";
-import { AddToCart } from "@/components/store/add-to-cart";
+import { ProductPurchase } from "@/components/store/product-purchase";
 import { ProductCard } from "@/components/store/product-card";
 import { formatPrice } from "@/lib/utils";
 import { siteConfig } from "@/lib/config";
@@ -80,7 +80,7 @@ async function ProductContent({ params }: { params: Promise<Params> }) {
       : 0;
 
   return (
-    <div className="shell py-8 lg:py-10">
+    <div className="shell pb-32 pt-8 lg:pb-10 lg:pt-10">
       <nav
         aria-label="Fil d'Ariane"
         className="flex flex-wrap items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-3"
@@ -126,7 +126,7 @@ async function ProductContent({ params }: { params: Promise<Params> }) {
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-accent-soft">
                   {product.categoryName ?? product.categorySlug}
                 </p>
-                <h1 className="mt-2 max-w-xl text-3xl font-extrabold uppercase leading-[0.95] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+                <h1 className="mt-2 max-w-xl text-3xl font-black uppercase leading-[0.95] tracking-[-0.055em] sm:text-4xl sm:font-extrabold sm:tracking-[-0.05em] lg:text-5xl">
                   {product.name}
                 </h1>
               </div>
@@ -182,7 +182,7 @@ async function ProductContent({ params }: { params: Promise<Params> }) {
                   : "Temporairement épuisé"}
               </span>
             </div>
-            <AddToCart product={product} variant="full" />
+            <ProductPurchase product={product} />
           </div>
 
           <dl className="mt-8 grid gap-0 border-t-2 border-ink text-sm text-ink-2 sm:grid-cols-2">

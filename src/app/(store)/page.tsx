@@ -21,7 +21,7 @@ const steps = [
   {
     number: "02",
     title: "Commandez",
-    text: "Ajoutez au panier ou achetez directement. Indiquez votre adresse, sans aucun paiement en ligne.",
+    text: "Commandez le produit en un geste. Indiquez votre adresse, sans aucun paiement en ligne.",
   },
   {
     number: "03",

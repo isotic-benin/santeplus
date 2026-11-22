@@ -23,7 +23,7 @@ export function QuantityStepper({
     <div
       className={cn(
         "inline-flex items-center border-2 border-ink bg-white",
-        small ? "h-9" : "h-12",
+        small ? "h-11" : "h-12",
       )}
       role="group"
       aria-label={label}
@@ -34,7 +34,7 @@ export function QuantityStepper({
         disabled={value <= min}
         className={cn(
           "grid place-items-center font-mono text-ink transition-colors hover:bg-accent hover:text-white disabled:opacity-30",
-          small ? "h-9 w-9" : "h-12 w-11",
+          small ? "h-11 w-11" : "h-12 w-11",
         )}
         aria-label="Diminuer la quantité"
       >
@@ -55,7 +55,7 @@ export function QuantityStepper({
         disabled={value >= limit}
         className={cn(
           "grid place-items-center font-mono text-ink transition-colors hover:bg-accent hover:text-white disabled:opacity-30",
-          small ? "h-9 w-9" : "h-12 w-11",
+          small ? "h-11 w-11" : "h-12 w-11",
         )}
         aria-label="Augmenter la quantité"
       >

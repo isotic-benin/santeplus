@@ -9,8 +9,7 @@ import {
   useState,
   type RefObject,
 } from "react";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
-import { useCart } from "@/components/store/cart-provider";
+import { Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -81,14 +80,10 @@ function MobileMenu({
   onClose,
   closeRef,
   dialogRef,
-  ready,
-  count,
 }: {
   onClose: () => void;
   closeRef: RefObject<HTMLButtonElement | null>;
   dialogRef: RefObject<HTMLDivElement | null>;
-  ready: boolean;
-  count: number;
 }) {
   const isActive = useIsActive();
 
@@ -134,16 +129,6 @@ function MobileMenu({
             {link.label}
           </Link>
         ))}
-        <Link
-          href="/panier"
-          onClick={onClose}
-          className="mt-8 flex items-center justify-between bg-ink px-5 py-4 font-mono text-xs font-bold uppercase tracking-[0.14em] text-white"
-        >
-          Mon panier
-          <span className="bg-accent px-2 py-0.5 text-white">
-            {ready ? count : 0}
-          </span>
-        </Link>
       </nav>
       <div className="border-t-2 border-ink px-6 py-5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
         <p>Paiement à la livraison · Retours sous 7 jours</p>
@@ -156,7 +141,6 @@ function MobileMenu({
 }
 
 export function Header() {
-  const { count, ready } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -251,18 +235,6 @@ export function Header() {
             >
               <Search className="h-[1.15rem] w-[1.15rem]" strokeWidth={2} />
             </Link>
-            <Link
-              href="/panier"
-              className="relative grid h-11 w-11 place-items-center border-2 border-ink text-ink transition-colors hover:bg-ink hover:text-white"
-              aria-label={`Panier${ready && count > 0 ? `, ${count} article${count > 1 ? "s" : ""}` : " vide"}`}
-            >
-              <ShoppingBag className="h-[1.2rem] w-[1.2rem]" strokeWidth={2} />
-              {ready && count > 0 && (
-                <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center bg-accent px-1 font-mono text-[11px] font-bold leading-none text-white">
-                  {count}
-                </span>
-              )}
-            </Link>
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -281,8 +253,6 @@ export function Header() {
           onClose={() => setMenuOpen(false)}
           closeRef={closeRef}
           dialogRef={dialogRef}
-          ready={ready}
-          count={count}
         />
       )}
     </>
