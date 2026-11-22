@@ -20,7 +20,7 @@ const links = [
 
 const tickerItems = [
   "Paiement à la livraison",
-  "Livraison offerte dès 50 000 FCFA",
+  "Livraison offerte sur toutes les commandes",
   "Alimentation, maison, mode et quotidien",
   "Retours acceptés sous 7 jours",
 ];
@@ -199,7 +199,7 @@ export function Header() {
           </div>
         </div>
         <p className="sr-only">
-          Paiement à la livraison. Livraison offerte dès 50 000 FCFA.
+          Paiement à la livraison. Livraison offerte sur toutes les commandes.
         </p>
       </div>
 

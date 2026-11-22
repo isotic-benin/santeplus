@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const AUTOPLAY_DELAY = 4500;
 
 export function ProductGallery({
   images,
@@ -15,22 +17,72 @@ export function ProductGallery({
   children?: React.ReactNode;
 }) {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [userActive, setUserActive] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [wideScreen, setWideScreen] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const current = images[active] ?? images[0] ?? "/placeholder.svg";
-  const total = images.length;
 
-  const goTo = (index: number) => {
-    const next = Math.max(0, Math.min(total - 1, index));
-    const scroller = scrollerRef.current;
-    if (scroller) {
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      scroller.scrollTo({
-        left: next * scroller.clientWidth,
-        behavior: reduce ? "auto" : "smooth",
-      });
+  const total = images.length;
+  const current = images[active] ?? images[0] ?? "/placeholder.svg";
+
+  useEffect(() => {
+    const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const wideQuery = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      setReduceMotion(reduceQuery.matches);
+      setWideScreen(wideQuery.matches);
+    };
+    sync();
+    reduceQuery.addEventListener("change", sync);
+    wideQuery.addEventListener("change", sync);
+    return () => {
+      reduceQuery.removeEventListener("change", sync);
+      wideQuery.removeEventListener("change", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setPageVisible(document.visibilityState === "visible");
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
+  const goTo = useCallback(
+    (index: number) => {
+      const next = Math.max(0, Math.min(total - 1, index));
+      const scroller = scrollerRef.current;
+      if (scroller) {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches;
+        scroller.scrollTo({
+          left: next * scroller.clientWidth,
+          behavior: reduce ? "auto" : "smooth",
+        });
+      }
+      setActive(next);
+    },
+    [total],
+  );
+
+  useEffect(() => {
+    if (
+      total <= 1 ||
+      wideScreen ||
+      reduceMotion ||
+      paused ||
+      userActive ||
+      !pageVisible
+    ) {
+      return;
     }
-    setActive(next);
-  };
+    const timer = window.setInterval(() => {
+      goTo(active === total - 1 ? 0 : active + 1);
+    }, AUTOPLAY_DELAY);
+    return () => window.clearInterval(timer);
+  }, [active, total, wideScreen, reduceMotion, paused, userActive, pageVisible, goTo]);
 
   const syncActive = () => {
     const scroller = scrollerRef.current;
@@ -39,10 +91,25 @@ export function ProductGallery({
     setActive(Math.max(0, Math.min(total - 1, index)));
   };
 
+  const autoplayOn = !wideScreen && !reduceMotion && !paused && total > 1;
+  const pauseLabel = reduceMotion
+    ? "Carrousel en pause — mouvement réduit"
+    : paused
+      ? "Reprendre le carrousel"
+      : "Mettre le carrousel en pause";
+
   return (
     <div className="relative">
-      {/* Carrousel mobile — défilement natif, snapping, flèches et compteur. */}
-      <div className="lg:hidden">
+      {/* Carrousel mobile — défilement natif, snapping, autoplay et pause. */}
+      <div
+        className="lg:hidden"
+        onMouseEnter={() => setUserActive(true)}
+        onMouseLeave={() => setUserActive(false)}
+        onFocus={() => setUserActive(true)}
+        onBlur={() => setUserActive(false)}
+        onTouchStart={() => setUserActive(true)}
+        onTouchEnd={() => setUserActive(false)}
+      >
         <div
           ref={scrollerRef}
           onScroll={syncActive}
@@ -82,7 +149,7 @@ export function ProductGallery({
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="mt-3 flex items-center gap-3">
           <button
             type="button"
             onClick={() => goTo(active - 1)}
@@ -93,8 +160,8 @@ export function ProductGallery({
             <ChevronLeft className="h-5 w-5" strokeWidth={2} />
           </button>
           <p
-            className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink-2 tabular-nums"
-            aria-live="polite"
+            className="flex-1 text-center font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink-2 tabular-nums"
+            aria-live={autoplayOn && !userActive ? "off" : "polite"}
           >
             {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
           </p>
@@ -107,10 +174,24 @@ export function ProductGallery({
           >
             <ChevronRight className="h-5 w-5" strokeWidth={2} />
           </button>
+          <button
+            type="button"
+            onClick={() => setPaused((value) => !value)}
+            disabled={reduceMotion || total <= 1}
+            aria-label={pauseLabel}
+            aria-pressed={paused}
+            className="grid h-11 w-11 shrink-0 place-items-center border-2 border-ink bg-ink text-white disabled:opacity-30"
+          >
+            {paused ? (
+              <Play className="h-4 w-4" strokeWidth={2} />
+            ) : (
+              <Pause className="h-4 w-4" strokeWidth={2} />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Version large : une image + vignettes. */}
+      {/* Version large : une image + vignettes, sans défilement automatique. */}
       <div className="hidden lg:block">
         <div className="media aspect-[4/5] border-2 border-ink">
           <Image

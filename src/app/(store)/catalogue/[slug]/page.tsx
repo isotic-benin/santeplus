@@ -14,7 +14,6 @@ import { ProductGallery } from "@/components/store/product-gallery";
 import { ProductPurchase } from "@/components/store/product-purchase";
 import { ProductCard } from "@/components/store/product-card";
 import { formatPrice } from "@/lib/utils";
-import { siteConfig } from "@/lib/config";
 
 interface Params {
   slug: string;
@@ -225,11 +224,7 @@ async function ProductContent({ params }: { params: Promise<Params> }) {
           </dl>
 
           <div className="mt-6 border-2 border-ink bg-surface p-4 text-sm text-ink-2">
-            Livraison offerte dès{" "}
-            <span className="font-mono font-bold text-ink">
-              {formatPrice(siteConfig.freeShippingThreshold)}
-            </span>{" "}
-            d&apos;achat. Une question ?{" "}
+            Livraison offerte sur toutes les commandes. Une question ?{" "}
             <Link href="/contact" className="underline hover:text-accent">
               Écrivez-nous
             </Link>

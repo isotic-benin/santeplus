@@ -14,7 +14,7 @@ const infoBlocks = [
     icon: Truck,
     title: "Livraison",
     id: "livraison",
-    text: "Cotonou et Porto-Novo sous 24 à 72 h. Reste du pays sous 3 à 5 jours ouvrés. Livraison offerte dès 50 000 FCFA d'achat.",
+    text: "Cotonou et Porto-Novo sous 24 à 72 h. Reste du pays sous 3 à 5 jours ouvrés. Livraison offerte sur toutes les commandes.",
   },
   {
     icon: ShieldCheck,

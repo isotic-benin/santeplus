@@ -10,7 +10,6 @@ import {
 import { ProductCard } from "@/components/store/product-card";
 import { HeroCarousel, type HeroSlide } from "@/components/store/hero-carousel";
 import { formatPrice } from "@/lib/utils";
-import { siteConfig } from "@/lib/config";
 
 const steps = [
   {
@@ -329,8 +328,7 @@ export default async function HomePage() {
               <Check className="h-4 w-4 text-accent-soft" strokeWidth={2.5} /> Sans paiement en ligne
             </li>
             <li className="flex items-center gap-2">
-              <Truck className="h-4 w-4 text-accent-soft" strokeWidth={2} /> Livraison offerte dès{" "}
-              {formatPrice(siteConfig.freeShippingThreshold)}
+              <Truck className="h-4 w-4 text-accent-soft" strokeWidth={2} /> Livraison offerte sur toutes les commandes
             </li>
           </ul>
         </div>
