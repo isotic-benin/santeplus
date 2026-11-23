@@ -176,7 +176,10 @@ export function ProductGallery({
           </button>
           <button
             type="button"
-            onClick={() => setPaused((value) => !value)}
+            onClick={() => {
+              setPaused((value) => !value);
+              setUserActive(false);
+            }}
             disabled={reduceMotion || total <= 1}
             aria-label={pauseLabel}
             aria-pressed={paused}

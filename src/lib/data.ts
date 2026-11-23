@@ -230,9 +230,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   cacheTag(...PRODUCT_TAGS);
 
   const db = await getDb();
+  // Ancien slug conservé en alias : les liens déjà diffusés restent valides.
+  const resolvedSlug =
+    slug === "magnesium-complexe-12-en-1"
+      ? "magnesium-complexe-25-en-1"
+      : slug;
   const doc = await db
     .collection<ProductDoc>("products")
-    .findOne({ slug, active: true });
+    .findOne({ slug: resolvedSlug, active: true });
   if (!doc) return null;
 
   const promotionDocs = await db
