@@ -7,10 +7,9 @@ export const siteConfig = {
   hours: "Lundi – Samedi, 9h – 18h",
   currency: process.env.NEXT_PUBLIC_CURRENCY || "XOF",
   locale: "fr-FR",
-  shippingFee: Number(process.env.NEXT_PUBLIC_SHIPPING_FEE ?? 0),
-  freeShippingThreshold: Number(
-    process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 0,
-  ),
+  // Livraison offerte : valeur fixe, indépendante de l'environnement.
+  shippingFee: 0,
+  freeShippingThreshold: 0,
   socials: {
     instagram: "https://instagram.com",
     facebook: "https://facebook.com",
